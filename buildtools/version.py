@@ -12,7 +12,7 @@
 #----------------------------------------------------------------------
 
 # Master copy of the project name
-PROJECT_NAME     = 'wxPython'
+PROJECT_NAME     = 'wxPythonMeticy'
 
 
 # The version numbers for wxPython are no longer kept in sync with the
@@ -26,7 +26,7 @@ VER_MAJOR        = 4
 VER_MINOR        = 2
 VER_RELEASE      = 2
 
-VER_FLAGS        = "a1"     # wxPython release flags
+VER_FLAGS        = "a1+2024.3.14"     # wxPython release flags
 
 # The VER_FLAGS value is appended to the version number constructed from the
 # first 3 components and should be set according to the following patterns.

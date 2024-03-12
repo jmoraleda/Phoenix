@@ -1,0 +1,29 @@
+# Publishes files associated with a release to PyPI
+
+name: Publish to wxPython-Meticy package in PyPI 
+
+on:
+  release:
+    types: [published, edited] # The action runs when we publish a release
+
+jobs:
+
+  publish-to-pypi:
+    name: Publish dist to PyPI
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/wxPython-Meticy  
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
+
+    steps:
+    - name: Download all the artifacts of the distribution
+      uses: actions/download-artifact@v4
+      with:
+        name: releases/download/${{ github.ref_name }}
+        # pattern: releases/download/${{ github.ref_name }}/*.whl
+        merge-multiple: true
+        path: dist/
+    - name: Publish distribution to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1

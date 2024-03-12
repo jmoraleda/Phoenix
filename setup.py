@@ -35,12 +35,12 @@ DOCS_BASE='http://docs.wxPython.org'
 #----------------------------------------------------------------------
 
 NAME             = version.PROJECT_NAME
-DESCRIPTION      = "Cross platform GUI toolkit for Python, \"Phoenix\" version"
-AUTHOR           = "Robin Dunn"
-AUTHOR_EMAIL     = "robin@alldunn.com"
+DESCRIPTION      = "Cross platform GUI toolkit for Python, \"Phoenix-Meticy\" version"
+AUTHOR           = "Jorge Moraleda"
+AUTHOR_EMAIL     = "jorge.moraleda@meticy.com"
 URL              = "http://wxPython.org/"
 PROJECT_URLS     = {
-                    "Source": "https://github.com/wxWidgets/Phoenix",
+                    "Source": "https://github.com/jmoraleda/Phoenix",
                     "Documentation": "https://docs.wxpython.org/",
                    }
 DOWNLOAD_URL     = "https://pypi.org/project/{}".format(NAME)

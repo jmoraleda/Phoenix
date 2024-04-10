@@ -23,8 +23,8 @@ PROJECT_NAME     = 'wxPythonMeticy'
 # MINOR numbers each time there is a corresponding bump in the wxWidgets
 # version numbers.
 VER_MAJOR        = 2024
-VER_MINOR        = 4
-VER_RELEASE      = 7
+VER_MINOR        = 7
+VER_RELEASE      = 27
 
 VER_FLAGS        = ".0"     # wxPython release flags
 

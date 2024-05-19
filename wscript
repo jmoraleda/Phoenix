@@ -22,7 +22,7 @@ cfg = Config(True)
 #-----------------------------------------------------------------------------
 # Options and configuration
 
-APPNAME = 'wxPython'
+APPNAME = 'wxPythonMeticy'
 VERSION = cfg.VERSION
 
 isWindows = sys.platform.startswith('win')
@@ -562,7 +562,7 @@ def build(bld):
         copy_file(name, cfg.PKGDIR, update=1, verbose=1)
 
     # Copy sip's sip.h for distribution with wxPython's header
-    copy_file('sip/siplib/sip.h', 'wx/include/wxPython', update=1, verbose=1)
+    copy_file('sip/siplib/sip.h', 'wx/include/wxPythonMeticy', update=1, verbose=1)
 
     # Create the build tasks for each of our extension modules.
     addRelwithdebugFlags(bld, 'siplib')

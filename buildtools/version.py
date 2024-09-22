@@ -22,11 +22,11 @@ PROJECT_NAME     = 'wxPythonMeticy'
 # wxPython source tarball. That said, we should still bump up the MAJOR and
 # MINOR numbers each time there is a corresponding bump in the wxWidgets
 # version numbers.
-VER_MAJOR        = 4
-VER_MINOR        = 3
-VER_RELEASE      = 2
+VER_MAJOR        = 2026
+VER_MINOR        = 8
+VER_RELEASE      = 23
 
-VER_FLAGS        = "a1"     # wxPython release flags
+VER_FLAGS        = "0"     # wxPython release flags
 
 # The VER_FLAGS value is appended to the version number constructed from the
 # first 3 components and should be set according to the following patterns.

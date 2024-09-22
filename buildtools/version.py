@@ -12,8 +12,7 @@
 #----------------------------------------------------------------------
 
 # Master copy of the project name
-PROJECT_NAME     = 'wxPythonMeticy'
-
+PROJECT_NAME = 'wxPythonMeticy'
 
 # The version numbers for wxPython are no longer kept in sync with the
 # wxWidgets version number. In the past the common version number was used to
@@ -22,11 +21,11 @@ PROJECT_NAME     = 'wxPythonMeticy'
 # wxPython source tarball. That said, we should still bump up the MAJOR and
 # MINOR numbers each time there is a corresponding bump in the wxWidgets
 # version numbers.
-VER_MAJOR        = 4
-VER_MINOR        = 2
-VER_RELEASE      = 5
+VER_MAJOR        = 2026
+VER_MINOR        = 8
+VER_RELEASE      = 14
 
-VER_FLAGS        = ""     # wxPython release flags
+VER_FLAGS = ".4.dev32"     # wxPython release flags
 
 # The VER_FLAGS value is appended to the version number constructed from the
 # first 3 components and should be set according to the following patterns.
@@ -57,7 +56,6 @@ VER_FLAGS        = ""     # wxPython release flags
 #
 # See also:
 #   http://www.python.org/dev/peps/pep-0440/
-
 
 # The version numbers of wxWidgets to be used in the build
 wxVER_MAJOR        = 3

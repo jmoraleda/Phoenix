@@ -12,7 +12,7 @@
 #----------------------------------------------------------------------
 
 # Master copy of the project name
-PROJECT_NAME     = 'wxPython'
+PROJECT_NAME     = 'wxPythonMeticy'
 
 
 # The version numbers for wxPython are no longer kept in sync with the

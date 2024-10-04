@@ -19,7 +19,7 @@ cfg = Config(True)
 #-----------------------------------------------------------------------------
 # Options and configuration
 
-APPNAME = 'wxPython'
+APPNAME = 'wxPythonMeticy'
 VERSION = cfg.VERSION
 
 isWindows = sys.platform.startswith('win')

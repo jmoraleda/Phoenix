@@ -8,7 +8,7 @@ env:
   WXPYTHON_BUILD_ARGS: '--release'
 
 jobs:
-  # Build a wxPython source archive, and save it as an artifact for use in the
+  # Build a wxPythonMeticy source archive, and save it as an artifact for use in the
   # job that builds the wheels.
   build-source-dist:
     runs-on: ubuntu-24.04
@@ -50,8 +50,8 @@ jobs:
       - name: Save sdist as job artifact
         uses: actions/upload-artifact@v7
         with:
-          name: wxPython-source
-          path: dist/wxpython-${{ steps.generate.outputs.version }}.tar.gz
+          name: wxPythonMeticy-source
+          path: dist/wxpythonmeticy-${{ steps.generate.outputs.version }}.tar.gz
 
   build-wheels:
     # wait for prior job to complete
@@ -101,7 +101,7 @@ jobs:
       - name: download CI source artifact
         uses: actions/download-artifact@v8
         with:
-          name: wxPython-source
+          name: wxPythonMeticy-source
           path: dist
 
       - name: Set up Python ${{ matrix.python-version }}-${{ matrix.architecture }}
@@ -119,31 +119,31 @@ jobs:
         run: |
           ./buildtools/install_depends.sh
 
-      - name: Build the wxPython wheel
+      - name: Build the wxPythonMeticy wheel
         env:
           WXPYTHON_BUILD_ARGS: ${{ steps.init.outputs.build_opts }}
         run: |
           cd dist
-          pip wheel -v wxpython-${{ env.VERSION }}.tar.gz
+          pip wheel -v wxpythonmeticy-${{ env.VERSION }}.tar.gz
 
       - name: Tag wheel filename with OS to avoid collisions across the OS matrix
         run: |
           cd dist
-          f=$(echo wxpython-${{ env.VERSION }}-*.whl)
-          mv "$f" "${f/wxpython-${{ env.VERSION }}-/wxpython-${{ env.VERSION }}+${{ steps.init.outputs.os_tag }}-}"
+          f=$(echo wxpythonmeticy-${{ env.VERSION }}-*.whl)
+          mv "$f" "${f/wxpythonmeticy-${{ env.VERSION }}-/wxpythonmeticy-${{ env.VERSION }}+${{ steps.init.outputs.os_tag }}-}"
 
       - name: Simple smoke test
         run: |
           cd dist
-          pip install wxpython-*.whl
+          pip install wxpythonmeticy-*.whl
           python -c "import wx; print(wx); print(wx.version()); print(wx.PlatformInfo)"
-          pip uninstall --yes wxPython
+          pip uninstall --yes wxPythonMeticy
 
       - name: Save wheel as job artifact
         uses: actions/upload-artifact@v7
         with:
-          name: wxPython-wheel-${{ matrix.os }}-${{ steps.init.outputs.canonical_id }}
-          path: dist/wxpython-*.whl
+          name: wxPythonMeticy-wheel-${{ matrix.os }}-${{ steps.init.outputs.canonical_id }}
+          path: dist/wxpythonmeticy-*.whl
 
   upload-wheels-to-release:
     name: Upload Linux wheels to GitHub Release
@@ -157,7 +157,7 @@ jobs:
     - name: Download all wheel artifacts
       uses: actions/download-artifact@v8
       with:
-        pattern: wxPython-wheel-*
+        pattern: wxPythonMeticy-wheel-*
         path: dist/
         merge-multiple: true
     - name: Upload wheels to existing GitHub Release
@@ -165,5 +165,5 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
         VERSION: ${{ needs.build-source-dist.outputs.VERSION }}
       run: |
-        gh release upload "wxPython-$VERSION" dist/* \
+        gh release upload "wxPythonMeticy-$VERSION" dist/* \
           --repo '${{ github.repository }}'

@@ -1,5 +1,5 @@
 #---------------------------------------------------------------------------
-# This workflow will build and archive a wxPython source distribution for
+# This workflow will build and archive a wxPythonMeticy source distribution for
 # CI. It will start by building a sdist archive first, and then that will be
 # used in subsequent jobs on each supported platform and Python version.
 #---------------------------------------------------------------------------
@@ -11,7 +11,7 @@ on:
   push:
     branches: [ 'master' ]
     tags:
-      - 'wxPython-*'
+      - 'wxPythonMeticy-*'
   pull_request:
     branches: [ 'master' ]
 
@@ -33,12 +33,12 @@ defaults:
 
 env:
   PYTHONUNBUFFERED: 1
-  WXPYTHON_BUILD_ARGS: ${{ startsWith(github.ref, 'refs/tags/') && '--release' || '' }}
+  WXPYTHON_BUILD_ARGS: '--release'
 
 #---------------------------------------------------------------------------
 
 jobs:
-  # Build a wxPython source archive, and save it as an artifact for use in the
+  # Build a wxPythonMeticy source archive, and save it as an artifact for use in the
   # job that builds the wheels.
   build-source-dist:
     runs-on: ubuntu-22.04
@@ -78,8 +78,8 @@ jobs:
       - name: Save sdist as job artifact
         uses: actions/upload-artifact@v4
         with:
-          name: wxPython-source
-          path: dist/wxPython-${{ steps.generate.outputs.version }}.tar.gz
+          name: wxPythonMeticy-source
+          path: dist/wxPythonMeticy-${{ steps.generate.outputs.version }}.tar.gz
 
       - name: Create demo source distribution (sdist_demo)
         if: github.event_name == 'push'
@@ -91,12 +91,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: demo
-          path: dist/wxPython-demo-${{ steps.generate.outputs.version }}.tar.gz
+          path: dist/wxPythonMeticy-demo-${{ steps.generate.outputs.version }}.tar.gz
 
 
 #---------------------------------------------------------------------------
 
-  # Use pip and the wxPython-source artifact to build a wxPython wheel for every
+  # Use pip and the wxPythonMeticy-source artifact to build a wxPythonMeticy wheel for every
   # supported Python version and architecture.
   build-wheels:
     # wait for prior job to complete
@@ -105,8 +105,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-22.04, windows-2022, macos-13 ]
-        python-version: [ '3.8', '3.9', '3.10', '3.11', '3.12', '3.13-dev' ]
-        architecture: [ 'x86', 'x64' ]
+        python-version: [ '3.11', '3.12', '3.13-dev' ]
+        architecture: [ 'x64' ]
         # Exclude x86 configs on non-Windows OSs
         exclude:
           - os: ubuntu-22.04
@@ -152,7 +152,7 @@ jobs:
       - name: download CI source artifact
         uses: actions/download-artifact@v4
         with:
-          name: wxPython-source
+          name: wxPythonMeticy-source
           path: dist
 
       - name: Set up Python ${{ matrix.python-version }}-${{ matrix.architecture }}
@@ -193,19 +193,19 @@ jobs:
         with:
           arch: '${{ matrix.architecture }}'
 
-      - name: Build the wxPython wheel
+      - name: Build the wxPythonMeticy wheel
         env:
           WXPYTHON_BUILD_ARGS: ${{ steps.init.outputs.build_opts }}
         run: |
           cd dist
-          pip wheel -v wxPython-${{ env.VERSION }}.tar.gz
+          pip wheel -v wxPythonMeticy-${{ env.VERSION }}.tar.gz
 
       - name: Simple smoke test
         run: |
           cd dist
-          pip install wxPython-*.whl
+          pip install wxPythonMeticy-*.whl
           python -c "import wx; print(wx); print(wx.version()); print(wx.PlatformInfo)"
-          pip uninstall --yes wxPython
+          pip uninstall --yes wxPythonMeticy
 
       - name: Save wheel as job artifact
         uses: actions/upload-artifact@v4
@@ -213,11 +213,11 @@ jobs:
         # point is that the build was successful.
         if: ${{ matrix.os != 'ubuntu-22.04' }}
         with:
-          name: wxPython-wheel-${{ steps.init.outputs.canonical_id }}
-          path: dist/wxPython-*.whl
+          name: wxPythonMeticy-wheel-${{ steps.init.outputs.canonical_id }}
+          path: dist/wxPythonMeticy-*.whl
 
   build-documentation:
-    name: Build wxPython documentation
+    name: Build wxPythonMeticy documentation
     if: github.event_name == 'push'
     runs-on: windows-2022
 
@@ -255,18 +255,18 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: docs
-          path: dist/wxPython-docs*.tar.gz
+          path: dist/wxPythonMeticy-docs*.tar.gz
 
 
   publish-to-pypi:
     name: Publish Python distribution to PyPI
-    if: startsWith(github.ref, 'refs/tags/')
+    if: github.ref == 'refs/heads/master'
     needs: build-wheels
     runs-on: ubuntu-22.04
 
     environment:
       name: pypi
-      url: https://pypi.org/p/wxPython
+      url: https://pypi.org/p/wxPythonMeticy
 
     permissions:
       id-token: write
@@ -275,7 +275,7 @@ jobs:
     - name: Download all the dists
       uses: actions/download-artifact@v4
       with:
-        pattern: wxPython-*
+        pattern: wxPythonMeticy-*
         path: dist/
         merge-multiple: true
     - name: Publish distribution to PyPI
@@ -284,51 +284,34 @@ jobs:
 
   github-release:
     name: Create GitHub Release and upload source
-    needs: publish-to-pypi
+    needs: [publish-to-pypi, build-source-dist]
     runs-on: ubuntu-22.04
 
     permissions:
       contents: write
       id-token: write
 
+    env:
+      VERSION: ${{ needs.build-source-dist.outputs.VERSION }}
+
     steps:
     - name: Download source distribution
       uses: actions/download-artifact@v4
       with:
-        name: wxPython-source
+        name: wxPythonMeticy-source
         path: dist
     - name: Create GitHub Release
       env:
         GITHUB_TOKEN: ${{ github.token }}
       run: |
-        gh release create '${{ github.ref_name }}' \
+        gh release create '${{ env.VERSION }}' \
           --repo '${{ github.repository }}' \
           --notes ""
     - name: Upload source distribution to GitHub Release
       env:
         GITHUB_TOKEN: ${{ github.token }}
       run: |
-        gh release upload '${{ github.ref_name }}' dist/* \
+        gh release upload '${{ env.VERSION }}' dist/* \
           --repo '${{ github.repository }}'
 
 
-  upload-wheels-to-snapshot-builds:
-    name: Upload wheels to snapshot-builds on wxpython.org
-    if: github.event_name == 'push'
-    needs: build-wheels
-    runs-on: ubuntu-22.04
-
-    steps:
-    - name: Download all the dists
-      uses: actions/download-artifact@v4
-      with:
-        path: dist/
-        merge-multiple: true
-    - name: Install SSH key
-      uses: shimataro/ssh-key-action@v2
-      with:
-        key: ${{ secrets.RIOBU_SSH_KEY }}
-        known_hosts: ${{ secrets.RIOBU_KNOWN_HOSTS }}
-    - name: SCP wheels
-      run: |
-        scp -p dist/* rbot.wxpython@riobu.com:snapshot-builds/

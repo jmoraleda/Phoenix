@@ -1,10 +1,11 @@
 [project]
-name = "wxPython"
-description = "Cross platform GUI toolkit for Python, \"Phoenix\" version"
+name = "wxPythonMeticy"
+description = "Cross platform GUI toolkit for Python, \"Phoenix-Meticy\" version"
 requires-python = ">= 3.9"
 authors = [
     { name = "Robin Dunn", email = "robin@alldunn.com" },
     { name = "Scott Talbert", email = "swt@techie.net" },
+    { name = "Jorge moraleda", email = "jorge.moraleda@meticy.com" },
 ]
 keywords = [
     "GUI",
@@ -62,10 +63,10 @@ wxget = "wx.tools.wxget:main"                 # New wx wget
 
 [project.urls]
 Documentation = "https://docs.wxpython.org/"
-Download = "https://pypi.org/project/wxPython"
+Download = "https://pypi.org/project/wxPythonMeticy"
 Homepage = "https://wxPython.org/"
-Source = "https://github.com/wxWidgets/Phoenix"
-Repository = "https://github.com/wxWidgets/Phoenix.git"
+Source = "https://github.com/jmoraleda/Phoenix"
+Repository = "https://github.com/jmoraleda/Phoenix.git"
 Issues = "https://github.com/wxWidgets/Phoenix/issues"
 Discuss = "https://discuss.wxpython.org/"
 

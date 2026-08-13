@@ -34,7 +34,6 @@ def run():
     c = module.find('wxClipboard')
     assert isinstance(c, etgtools.ClassDef)
     c.mustHaveApp()
-    c.noDefCtor = True
     c.find('Get').mustHaveApp()
 
     c.find('AddData.data').transfer = True

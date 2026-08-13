@@ -40,7 +40,6 @@ def run():
     for name in [ 'CreateFontMapper',
                   'CreateMessageOutput',
                   'CreateRenderer',
-                  'GetAssertStackTrace',
                   ]:
         c.find(name).ignore()
 

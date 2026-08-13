@@ -21,15 +21,10 @@ ITEMS  = [ 'wxWebViewHistoryItem',
            'wxWebViewHandler',
            'wxWebViewArchiveHandler',
            'wxWebViewFSHandler',
-           'wxWebViewConfiguration',
-           'wxWebViewFactory',
            'wxWebView',
            'wxWebViewEvent',
+           'wxWebViewFactory',
            'wxWebViewIE',
-           'wxWebViewHandlerRequest',
-           'wxWebViewHandlerResponse',
-           'wxWebViewHandlerResponseData',
-           'wxWebViewWindowFeatures',
            ]
 
 #---------------------------------------------------------------------------
@@ -98,35 +93,20 @@ def run():
 
     # Documented wrongly in 3.1.6 (needs to be fixed in stubs too)
     c = module.find('wxWebViewFactory')
-    c.find('GetVersionInfo').ignore()
-    c.find('CreateConfiguration').isPureVirtual = True
-    c.find('CreateConfiguration').setCppCode_sip("""\
-        #if wxUSE_WEBVIEW
-            PyErr_Clear();
-            Py_BEGIN_ALLOW_THREADS
-            wxWebViewConfiguration cfg = sipCpp->CreateConfiguration();
-            sipRes = new wxWebViewConfiguration(cfg.GetBackend(), cfg.GetImpl());
-            Py_END_ALLOW_THREADS
-            if (PyErr_Occurred()) sipIsErr = 1;
-        #else
-            wxPyRaiseNotImplemented();
-        #endif
-    """)
+    c.find('GetVersionInfo').argsString = '()'
+    c.find('GetVersionInfo').items = []
 
     tools.generateStubs('wxUSE_WEBVIEW', module,
                         typeValMap={
                             'wxWebViewNavigationActionFlags': 'wxWEBVIEW_NAV_ACTION_NONE',
                             'wxWebViewZoom': 'wxWEBVIEW_ZOOM_MEDIUM',
                             'wxVersionInfo': 'wxVersionInfo()',
-                            'wxWebViewConfiguration': 'wxWebView::NewConfiguration()',
                             })
 
     c = module.find('wxWebView')
     assert isinstance(c, etgtools.ClassDef)
     tools.fixWindowClass(c)
     c.abstract = True
-    c.find('GetBackendVersionInfo').ignore()
-    c.find('NewConfiguration').ignore()
 
     for m in c.find('New').all():
         m.factory = True
@@ -291,28 +271,6 @@ def run():
         c = module.find(name)
         c.find('GetFile').factory = True
 
-        
-    c = module.find('wxWebViewHandler')
-    c.find('StartRequest').ignore()
-    
-    c = module.find('wxWebViewHandlerRequest')
-    c.find('GetDataString').ignore()
-
-    c = module.find('wxWebViewHandlerResponse')
-    c.abstract = True
-    for m in c.find('Finish').all():
-        m.ignore()
-
-    c = module.find('wxWebViewConfiguration')
-    c.abstract = True
-    c.instanceCode = """\
-        #if wxUSE_WEBVIEW
-            sipCpp = new wxWebViewConfiguration("", NULL);
-        #endif
-        """
- 
-    c = module.find('wxWebViewWindowFeatures')
-    c.abstract = True
 
     #-----------------------------------------------------------------
     tools.doCommonTweaks(module)

@@ -70,7 +70,6 @@ def run():
 
     c = module.find('wxLogRecordInfo')
     c.find('threadId').ignore()
-    c.find('timestamp').ignore()
 
 
     c = module.find('wxLog')
@@ -118,7 +117,7 @@ def run():
     c.addPrivateAssignOp()
 
     c = module.find('wxLogFormatter')
-    c.find('FormatTime').ignore()
+    c.find('FormatTime').ignore(False)
 
     c = module.find('wxLogNull')
     c.addPyMethod('__enter__', '(self)', 'return self')

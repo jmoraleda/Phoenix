@@ -226,8 +226,6 @@ def run():
         return _readlinesHelper(self, true, sizehint);
         """)
 
-    c.find('Read').findOverload('std::vector< wxUint8 >').ignore()
-
 
     #-----------------------------------------------------------------
     c = module.find('wxOutputStream')

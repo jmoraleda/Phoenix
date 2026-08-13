@@ -23,6 +23,8 @@ import textwrap
 from typing import NamedTuple, Optional, Tuple, Union
 
 
+isWindows = sys.platform.startswith('win')
+
 magicMethods = {
     'operator!='    : '__ne__',
     'operator=='    : '__eq__',
@@ -769,6 +771,9 @@ def addWindowVirtuals(klass):
         #void UpdateWindowUI(long flags = wxUPDATE_UI_NONE);
         #void DoUpdateWindowUI(wxUpdateUIEvent& event) ;
     ]
+    if isWindows:
+        # does not compile on GTK and macOS.
+        publicWindowVirtuals.append( ('CreateAccessible', 'wxAccessible* CreateAccessible()') )
 
     protectedWindowVirtuals = [
         ('ProcessEvent',              'bool ProcessEvent(wxEvent & event)'),
@@ -784,6 +789,7 @@ def addWindowVirtuals(klass):
         ('DoMoveWindow',              'void DoMoveWindow(int x, int y, int width, int height)'),
         ('DoSetWindowVariant',        'void DoSetWindowVariant( wxWindowVariant variant)'),
         ('GetDefaultBorder',          'wxBorder GetDefaultBorder() const'),
+        ('GetDefaultBorderForControl','wxBorder GetDefaultBorderForControl() const'),
         ('DoFreeze',                  'void DoFreeze()'),
         ('DoThaw',                    'void DoThaw()'),
         ('HasTransparentBackground',  'bool HasTransparentBackground()'),
@@ -814,16 +820,6 @@ def addWindowVirtuals(klass):
     txt = _processItems(klass, 'protected:\n', protectedWindowVirtuals)
     klass.addItem(extractors.WigCode(txt))
     klass.addPublic()
-
-    if klass.name not in ['wxWindow', 'wxProgressDialog', 'wxRichTextCtrl']:
-        klass.addCppMethod('wxAccessible*', 'CreateAccessible', '()', """\
-            #if wxUSE_ACCESSIBILITY
-                return self->CreateAccessible();
-            #else
-                wxPyRaiseNotImplemented();
-                return NULL;
-            #endif
-            """, factory=True)
 
 
 def addSipConvertToSubClassCode(klass):
@@ -1041,18 +1037,6 @@ def addGetIMMethodTemplate(module, klass, fields):
         )
 
 #---------------------------------------------------------------------------
-
-
-def addAccessibilityHeaderCode(module):
-    # This is needed in any module that has wxWindow subclasses so that the
-    # CreateAccessible methods can be compiled correctly.
-    module.addHeaderCode('#include <wx/access.h>')
-    module.addHeaderCode([
-        '#if !wxUSE_ACCESSIBILITY',
-        'class wxAccessible;',
-        '#endif',
-    ])
-
 
 def convertTwoIntegersTemplate(CLASS):
     # Note: The GIL is already acquired where this code is used.
@@ -1299,7 +1283,9 @@ public:
 
     int __contains__(const {ItemClass}* obj);
     %MethodCode
-        sipRes = sipCpp->Member(({RealItemClass}*)obj);
+        {ListClass}::compatibility_iterator node;
+        node = sipCpp->Find(({RealItemClass}*)obj);
+        sipRes = node != NULL;
     %End
 
     {ListClass}_iterator* __iter__() /Factory/;
@@ -1481,104 +1467,6 @@ def _{ArrayClass_pyName}___repr__(self):
     return "{ArrayClass_pyName}: " + repr(list(self))
 {ArrayClass_pyName}.__repr__ = _{ArrayClass_pyName}___repr__
 del _{ArrayClass_pyName}___repr__
-%End
-'''.format(**locals()))
-
-
-
-def stdVectorWrapperTemplate(VectorClass, ItemClass, module, itemIsPtr=False, getItemCopy=False, typeHeaderHelper=""):
-    moduleName = module.module
-    VectorClass_pyName = removeWxPrefix(VectorClass)
-    itemRef = '*' if itemIsPtr else '&'
-    itemDeref = '' if itemIsPtr else '*'
-    addrOf = '' if itemIsPtr else '&'
-
-    # *** TODO: This can probably be done in a way that is not SIP-specific.
-    # Try creating extractor objects from scratch and attach cppMethods to
-    # them as needed, etc..
-
-    if not getItemCopy:
-        getitemMeth = '''\
-        {ItemClass}{itemRef} __getitem__(long index);
-        %MethodCode
-            if (0 > index)
-                index += sipCpp->size();
-
-            if ((index < sipCpp->size()) && (0 <= index)) {{
-                sipRes = {addrOf}sipCpp->at(index);
-            }}
-            else {{
-                wxPyErr_SetString(PyExc_IndexError, "sequence index out of range");
-                sipError = sipErrorFail;
-            }}
-        %End
-        '''.format(**locals())
-    else:
-        getitemMeth = '''\
-        {ItemClass}* __getitem__(long index) /Factory/;
-        %MethodCode
-            if (0 > index)
-                index += sipCpp->size();
-            if ((index < sipCpp->size()) && (0 <= index)) {{
-                sipRes = new {ItemClass}(sipCpp->at(index));
-            }}
-            else {{
-                wxPyErr_SetString(PyExc_IndexError, "sequence index out of range");
-                sipError = sipErrorFail;
-            }}
-        %End
-        '''.format(**locals())
-
-
-    return extractors.WigCode('''\
-class {VectorClass}
-{{
-%TypeHeaderCode
-    #include <vector>
-    #include <algorithm>
-
-    {typeHeaderHelper}
-%End
-
-public:
-    Py_ssize_t __len__();
-    %MethodCode
-        sipRes = sipCpp->size();
-    %End
-
-    {getitemMeth}
-
-    int __contains__({ItemClass}{itemRef} obj);
-    %MethodCode
-        auto it = std::find(sipCpp->begin(), sipCpp->end(), {itemDeref}obj);
-        sipRes = (it != sipCpp->end());
-    %End
-
-    void append({ItemClass}{itemRef} obj);
-    %MethodCode
-        sipCpp->push_back({itemDeref}obj);
-    %End
-
-    // TODO:  add support for index(value, [start, [stop]])
-    int index({ItemClass}{itemRef} obj);
-    %MethodCode
-        auto it = std::find(sipCpp->begin(), sipCpp->end(), {itemDeref}obj);
-
-        if (it == sipCpp->end()) {{
-            sipError = sipErrorFail;
-            PyErr_SetString(PyExc_ValueError, "sequence.index(x): x not in sequence");
-        }}
-        else {{
-            sipRes = std::distance(sipCpp->begin(), it);
-        }}
-    %End
-}};
-
-%Extract(id=pycode{moduleName})
-def _{VectorClass_pyName}___repr__(self):
-    return "{VectorClass_pyName}: " + repr(list(self))
-{VectorClass_pyName}.__repr__ = _{VectorClass_pyName}___repr__
-del _{VectorClass_pyName}___repr__
 %End
 '''.format(**locals()))
 
@@ -1895,8 +1783,6 @@ def _generateClassStub(code, klass, typeValMap):
 
     for item in klass:
         dispatchMap = {
-            extractors.EnumDef   : _generateEnumStub,
-            extractors.MemberVarDef: lambda c, i, t: None,  # ignore this type
             extractors.MethodDef : _generateMethodStub,
             extractors.WigCode   : lambda c, i, t: None,  # ignore this type
             }
@@ -1925,8 +1811,6 @@ def _generateMethodStub(code, method, typeValMap):
         decl += '{} {}'.format(method.type, method.name)
     decl += method.argsString
     if method.isPureVirtual:
-        if '=0' not in decl:
-            decl += '=0'
         decl += ';'
     code.hdr.append(decl)
 

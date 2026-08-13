@@ -67,7 +67,7 @@ def run():
         #endif
         """)
 
-    c.find('GeometryStore').abstract = True
+    c.find('GeometrySerializer').abstract = True
 
     c.addProperty('DefaultItem GetDefaultItem SetDefaultItem')
     c.addProperty('Icon GetIcon SetIcon')

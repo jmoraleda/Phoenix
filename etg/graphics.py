@@ -77,8 +77,6 @@ def run():
         body="""\
             return wxGraphicsContext::Create(*autoPaintDC);
             """)
-            
-    c.find('GetClipBox').findOverload('').ignore()
 
     m = c.find('Create').findOverload('wxEnhMetaFileDC')
     m.find('metaFileDC').type = 'const wxMetafileDC&'

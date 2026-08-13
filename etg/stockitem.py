@@ -31,7 +31,9 @@ def run():
     # Tweak the parsed meta objects in the module object as needed for
     # customizing the generated code and docstrings.
 
-
+    # wxStockHelpStringClient is only defined in include/wx/stockitem.h, not
+    # in the doxygen-documented interface, so it can't be resolved.
+    module.find('wxGetStockHelpString').ignore()
 
     #-----------------------------------------------------------------
     tools.doCommonTweaks(module)

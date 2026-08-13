@@ -40,10 +40,6 @@ def parseAndTweakModule():
     scrolled.find('GetViewStart.x').out = True
     scrolled.find('GetViewStart.y').out = True
 
-    scrolled.find('GetViewStartPixels').findOverload('()').ignore()
-    scrolled.find('GetViewStartPixels.x').out = True
-    scrolled.find('GetViewStartPixels.y').out = True
-
     m = scrolled.find('CalcScrolledPosition').findOverload('xx')
     m.find('xx').out = True
     m.find('yy').out = True
@@ -69,10 +65,6 @@ def parseAndTweakModule():
     scrolled.find('SendAutoScrollEvents').isVirtual = True
     scrolled.find('ShouldScrollToChildOnFocus').ignore(False)
     scrolled.find('ShouldScrollToChildOnFocus').isVirtual = True
-
-    # Workaround a bug in sip by renaming template args for wxScrolled
-    scrolled.templateParams = ['BASE']
-    scrolled.bases = ['BASE']
 
     # The wxScrolledCanvas typedef will be output normally and SIP will treat
     # it like a class that has a wxScrolled mix-in as one of the base classes.

@@ -76,7 +76,7 @@ def getWxRelease(wxRoot=None):
     if not wxRoot:
         global wxRootDir
         wxRoot = wxRootDir
-    with open(os.path.join(wxRoot, "configure.ac"), "r") as fid:
+    with open(os.path.join(wxRoot, "configure.in"), "r") as fid:
         configureText = fid.read()
     majorVersion = re.search(r"wx_major_version_number=(\d+)", configureText).group(1)
     minorVersion = re.search(r"wx_minor_version_number=(\d+)", configureText).group(1)
@@ -202,6 +202,7 @@ def main(wxDir, args):
         "no_config"     : (False, "Turn off configure step on autoconf builds"),
         "config_only"   : (False, "Only run the configure step and then exit"),
         "rebake"        : (False, "Regenerate Bakefile and autoconf files"),
+        "unicode"       : (False, "Build the library with unicode support"),
         "wxpython"      : (False, "Build the wxWidgets library with all options needed by wxPython"),
         "osx_cocoa"     : (False, "Build the Cocoa port"),
         "osx_carbon"    : (False, "Build the Carbon port"),
@@ -212,8 +213,6 @@ def main(wxDir, args):
         "jom"           : (False, "Use jom.exe instead of nmake for MSW builds."),
         "no_dpi_aware"  : (False, "Don't use the DPI_AWARE_MANIFEST."),
         "no_msedge"     : (False, "Do not include the MS Edge backend for wx.html2.WebView. (Windows only)"),
-        "set_rpath_origin"
-                        : (False, "Set RPATH to $ORIGIN when building wxWidgets libraries"),
     }
 
     parser = optparse.OptionParser(usage="usage: %prog [options]", version="%prog 1.0")
@@ -245,6 +244,9 @@ def main(wxDir, args):
         if options.features != "":
             configure_opts.extend(options.features.split(" "))
 
+        if options.unicode:
+            configure_opts.append("--enable-unicode")
+
         if options.debug:
             configure_opts.append("--enable-debug")
 
@@ -267,6 +269,7 @@ def main(wxDir, args):
                             "--enable-sound",
                             "--enable-graphics_ctx",
                             "--enable-display",
+                            "--enable-geometry",
                             "--enable-debug_flag",
                             "--enable-optimise",
                             "--disable-debugreport",
@@ -321,7 +324,6 @@ def main(wxDir, args):
             wxpy_configure_opts.append("--with-libjpeg=builtin")
             wxpy_configure_opts.append("--with-libpng=builtin")
             wxpy_configure_opts.append("--with-libtiff=builtin")
-            wxpy_configure_opts.append("--with-libwebp=builtin")
             wxpy_configure_opts.append("--with-regex=builtin")
 
 
@@ -372,10 +374,6 @@ def main(wxDir, args):
             env = dict(os.environ)
             del env["CONFIG_SITE"]
 
-        if options.set_rpath_origin:
-            configure_opts.append("--disable-rpath")
-            configure_opts.append(r"LDFLAGS='-Wl,-rpath,\$$ORIGIN'")
-
         print("Configure options: " + repr(configure_opts))
         wxBuilder = builder.AutoconfBuilder()
         if not options.no_config and not options.clean:
@@ -395,6 +393,10 @@ def main(wxDir, args):
         buildDir = os.path.abspath(os.path.join(wxRootDir, "build", "msw"))
 
         print("Updating wx/msw/setup.h")
+        if options.unicode:
+            flags["wxUSE_UNICODE"] = "1"
+            if VERSION < (2,9):
+                flags["wxUSE_UNICODE_MSLU"] = "1"
 
         if options.cairo:
             if not os.environ.get("CAIRO_ROOT"):
@@ -439,6 +441,10 @@ def main(wxDir, args):
         if toolkit == "msvc":
             print("setting build options...")
             args.append("-f makefile.vc")
+            if options.unicode:
+                args.append("UNICODE=1")
+                if VERSION < (2,9):
+                    args.append("MSLU=1")
 
             if options.wxpython:
                 args.append("OFFICIAL_BUILD=1")

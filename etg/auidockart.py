@@ -33,9 +33,8 @@ def run():
     # customizing the generated code and docstrings.
 
 
-    c = module.find('wxAuiDefaultDockArt')
+    c = module.find('wxAuiDockArt')
     assert isinstance(c, etgtools.ClassDef)
-    c.find('DrawIcon').ignore()
 
 
     #-----------------------------------------------------------------

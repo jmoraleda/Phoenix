@@ -100,7 +100,7 @@ toolsURL = 'https://wxwidgets.github.io/wxPython-tools'
 
 
 # MS Edge code and DLLs needed for the wxWEBVIEW_BACKEND_EDGE backend
-MS_edge_version = '1.0.3719.77'
+MS_edge_version = '1.0.1185.39'
 MS_edge_url = 'https://www.nuget.org/api/v2/package/Microsoft.Web.WebView2/{}'.format(MS_edge_version)
 
 #---------------------------------------------------------------------------
@@ -450,6 +450,7 @@ def makeOptionParser():
 
         (("j","jobs"),     ("",    "Number of parallel compile jobs to do, if supported.")),
         ("both",           (False, "Build both a debug and release version. (Only used on Windows)")),
+        ("unicode",        (True,  "Build wxPython with unicode support (always on for wx2.9+)")),
         (("v", "verbose"), (False, "Print out more information during the build.")),
         ("nodoc",          (False, "Do not run the default docs generator")),
         ("upload",         (False, "Upload bdist and/or sdist packages to snapshot server.")),
@@ -1509,7 +1510,7 @@ def cmd_build_wx(options, args):
         return
     checkCompiler()
 
-    build_options = ['--wxpython']
+    build_options = ['--wxpython', '--unicode']
 
     if options.jobs:
         build_options.append('--jobs=%s' % options.jobs)
@@ -1596,7 +1597,7 @@ def cmd_build_wx(options, args):
         # for shared libraries in a folder relative to the loading binary's
         # location. Here we'll use just $ORIGIN so it should look in the same
         # folder as the wxPython extension modules.
-        build_options.append('--set_rpath_origin')
+        os.environ['LD_RUN_PATH'] = '$ORIGIN'
 
     try:
         # Import and run the wxWidgets build script
@@ -1770,10 +1771,15 @@ def cmd_build_py(options, args):
             build_options.append('--gtk3')
             wafBuildDir = posixjoin(wafBuildBase, 'gtk3')
 
-    if options.no_magic:
-        build_options.append('--no_magic')
     build_options.append('--python="%s"' % PYTHON)
     build_options.append('--out=%s' % wafBuildDir) # this needs to be the last option
+
+    if not isWindows and not isDarwin and not options.no_magic and not options.use_syswx:
+        # Using $ORIGIN in the rpath will cause the dynamic linker to look
+        # for shared libraries in a folder relative to the loading binary's
+        # location. Here we'll use just $ORIGIN so it should look in the same
+        # folder as the wxPython extension modules.
+        os.environ['LD_RUN_PATH'] = '$ORIGIN'
 
     # Regenerate the _sysconfigdata module?
     if options.regenerate_sysconfig:
@@ -2178,13 +2184,9 @@ def cmd_sdist(options, args):
 
     # recursively export a git archive of this repo and submodules
     def _archive_submodules(root, dest):
-        # Skip deps/sljit which is a submodule of ext/wxWidgets/3rdparty/pcre
-        # It seems to be oddly configured and not needed?
-        if root == 'deps/sljit':
-            return
         msg('Exporting {}...'.format(root))
         if not os.path.exists(dest):
-            os.makedirs(dest)
+            os.path.makedirs(dest)
         pwd = pushDir(root)
         #runcmd('git archive HEAD | tar -x -C %s' % dest, echoCmd=False)
         archive = opj(TMP, 'export.tar')

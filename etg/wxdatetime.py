@@ -413,11 +413,7 @@ def run():
                 return None
             """)
 
-    c = module.find('wxDateTime.NameForm')
-    assert isinstance(c, etgtools.ClassDef)
-    ctor = c.find('NameForm')
-    ctor.find('flags').type = 'wxDateTime::NameFlags'
-    ctor.find('flags').default = 'wxDateTime::NameFlags::Name_Full'
+
 
     #-----------------------------------------------------------------
     tools.doCommonTweaks(module)

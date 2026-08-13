@@ -192,11 +192,8 @@ def run():
     c = module.find('wxFileTypeInfo')
 
     # Ignore the variadic nature of this ctor
-    ctor = c.find('wxFileTypeInfo').findOverload('extensions')
-    extParam = ctor.find('extensions')
-    extParam.type = 'const wxString &'
-    extParam.name = 'extension'
-    ctor.argsString = ctor.argsString.replace('Targs... extensions', 'const wxString &extension')
+    ctor = c.find('wxFileTypeInfo').findOverload('extension')
+    ctor.items[-1].ignore()
     ctor.setCppCode("""\
         wxFileTypeInfo* fti = new wxFileTypeInfo(*mimeType);
         fti->SetOpenCommand(*openCmd);

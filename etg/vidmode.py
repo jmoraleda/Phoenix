@@ -35,13 +35,9 @@ def run():
     c.addCppMethod('int', '__nonzero__', '()', "return self->IsOk();")
     c.addCppMethod('int', '__bool__', '()', "return self->IsOk();")
 
-    c = module.find('wxArrayVideoModes')
-    assert isinstance(c, etgtools.TypedefDef)
-    c.ignore()
-    
     module.addItem(tools.wxArrayWrapperTemplate(
         'wxArrayVideoModes', 'wxVideoMode', module))
- 
+
     #-----------------------------------------------------------------
     tools.doCommonTweaks(module)
     tools.runGenerators(module)

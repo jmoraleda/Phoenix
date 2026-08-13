@@ -485,7 +485,6 @@ class FunctionDef(BaseDef, FixWxPrefix):
         defValueMap = { 'true':  'True',
                         'false': 'False',
                         'NULL':  'None',
-                        'nullptr': 'None',
                         'wxString()': '""',
                         'wxArrayString()' : '[]',
                         'wxArrayInt()' : '[]',
@@ -1217,10 +1216,8 @@ class EnumDef(BaseDef):
     def __init__(self, element=None, inClass=[], **kw):
         super(EnumDef, self).__init__()
         self.inClass = inClass
-        self.isScoped = False
         if element is not None:
             prot = element.get('prot')
-            strong = element.get('strong')
             if prot is not None:
                 self.protection = prot
                 assert self.protection in ['public', 'protected']
@@ -1228,12 +1225,6 @@ class EnumDef(BaseDef):
                 #       leave that up to the tweaker code or the generators?
                 if self.protection == 'protected':
                     self.ignore()
-            if strong is not None:
-                assert strong in ['yes', 'no']
-                if strong == 'yes':
-                    self.isScoped = True
-                else:
-                    self.isScoped = False
             self.extract(element)
         self.__dict__.update(kw)
 

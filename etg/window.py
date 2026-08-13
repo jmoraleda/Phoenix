@@ -414,9 +414,6 @@ def run():
     #    """)
 
 
-    c.find('GTKGetWin32Handle').ignore()
-    c.find('CallForEachChild').ignore()
- 
     # this is a nested class
     c.find('ChildrenRepositioningGuard').addPrivateCopyCtor()
     module.insertItem(0,

@@ -22,8 +22,6 @@ DOCSTRING = ""
 ITEMS  = [ 'wxTextAttr',
            'wxTextCtrl',
            'wxTextUrlEvent',
-           'wxTextSearch',
-           'wxTextSearchResult',
            ]
 
 #---------------------------------------------------------------------------
@@ -69,6 +67,17 @@ def parseAndTweakModule():
     c.find('OnDropFiles').ignore()
 
     tools.fixWindowClass(c)
+
+    c.addCppMethod('void', 'MacCheckSpelling', '(bool check)',
+        doc="""\
+            Turn on the native spell checking for the text widget on
+            OSX.  Ignored on other platforms.
+            """,
+        body="""\
+            #ifdef __WXMAC__
+                self->MacCheckSpelling(check);
+            #endif
+            """)
 
     c.addCppMethod('bool', 'ShowNativeCaret', '(bool show = true)',
         doc="""\
@@ -133,10 +142,6 @@ def parseAndTweakModule():
     # so will need stubs on other platforms.
     c.find('EnableProofCheck').ignore()
     c.find('GetProofCheckOptions').ignore()
-    
-    c.find('GTKGetTextBuffer').ignore()
-    c.find('GTKGetEditable').ignore()
-    c.find('GTKSetPangoMarkup').ignore()
 
     # This method exists only on OSX
     c.find('OSXEnableNewLineReplacement').setCppCode("""\

@@ -38,7 +38,6 @@ def run():
     c = module.find('wxAuiToolBar')
     assert isinstance(c, etgtools.ClassDef)
     tools.fixWindowClass(c)
-    c.find('SetArtProvider.art').transfer = True
 
 
     c = module.find('wxAuiToolBarEvent')

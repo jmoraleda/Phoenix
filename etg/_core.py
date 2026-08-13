@@ -50,7 +50,6 @@ INCLUDES = [  # base and core stuff
               'wxpybuffer',
               'msgdlg_btnlabel',
               'wxvector',
-              'stdvector',
 
               'stockgdi',
               'longlong',
@@ -241,7 +240,6 @@ INCLUDES = [  # base and core stuff
               'modalhook',
               'unichar',
               'stockitem',
-              'darkmode',
               ]
 
 
